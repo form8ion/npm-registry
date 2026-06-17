@@ -1,5 +1,11 @@
-import {Then} from '@cucumber/cucumber';
+import {mergeIntoExistingPackageJson} from '@form8ion/javascript-core';
+
+import {Given, Then} from '@cucumber/cucumber';
 import assert from 'node:assert';
+
+Given('the package access level is {string}', async function (accessLevel) {
+  await mergeIntoExistingPackageJson({projectRoot: this.projectRoot, config: {publishConfig: {access: accessLevel}}});
+});
 
 Then('the npm badge is defined for the registry', async function () {
   const {badges} = this.results;
@@ -12,4 +18,8 @@ Then('the npm badge is defined for the registry', async function () {
   assert.equal(badgeHost, 'img.shields.io');
   assert.equal(badgeProtocol, 'https:');
   assert.equal(searchParams.get('logo'), 'npm');
+});
+
+Then('the npm badge is not defined', async function () {
+  assert.strictEqual(this.results.badges.consumer.npm, undefined);
 });

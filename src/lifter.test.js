@@ -11,9 +11,9 @@ vi.mock('@form8ion/javascript-core');
 describe('npm registry lifter', () => {
   const projectRoot = any.simpleObject();
 
-  it('should define the registry badge', async () => {
+  it('should define the registry badge when the package has a `public` access level', async () => {
     const packageName = any.word();
-    when(loadPackageJson).calledWith({projectRoot}).thenResolve({name: packageName});
+    when(loadPackageJson).calledWith({projectRoot}).thenResolve({name: packageName, publishConfig: {access: 'public'}});
 
     expect(await liftNpmRegistry({projectRoot})).toEqual({
       badges: {
@@ -26,5 +26,21 @@ describe('npm registry lifter', () => {
         }
       }
     });
+  });
+
+  it('should not define the registry badge when the package has a `restricted` access level', async () => {
+    const packageName = any.word();
+    when(loadPackageJson)
+      .calledWith({projectRoot})
+      .thenResolve({name: packageName, publishConfig: {access: 'restricted'}});
+
+    expect(await liftNpmRegistry({projectRoot})).toEqual({badges: {consumer: {}}});
+  });
+
+  it('should not define the registry badge when the package does not define `publishConfig`', async () => {
+    const packageName = any.word();
+    when(loadPackageJson).calledWith({projectRoot}).thenResolve({name: packageName});
+
+    expect(await liftNpmRegistry({projectRoot})).toEqual({badges: {consumer: {}}});
   });
 });
