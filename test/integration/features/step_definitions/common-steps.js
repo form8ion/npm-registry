@@ -3,6 +3,7 @@ import {fileURLToPath} from 'node:url';
 
 import {After, Before, When} from '@cucumber/cucumber';
 import stubbedFs from 'mock-fs';
+import any from '@travi/any';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));          // eslint-disable-line no-underscore-dangle
 const stubbedNodeModules = stubbedFs.load(resolve(__dirname, '..', '..', '..', '..', 'node_modules'));
@@ -16,7 +17,8 @@ Before(async function () {
   ({scaffold, lift} = await import('@form8ion/npm-registry'));
 
   stubbedFs({
-    node_modules: stubbedNodeModules
+    node_modules: stubbedNodeModules,
+    'package.json': JSON.stringify(any.simpleObject())
   });
 });
 
@@ -29,5 +31,5 @@ When('the project is scaffolded', async function () {
 });
 
 When('the project is lifted', async function () {
-  await lift();
+  this.results = await lift({projectRoot: this.projectRoot});
 });
